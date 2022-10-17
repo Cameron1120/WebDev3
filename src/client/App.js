@@ -1,6 +1,10 @@
 import React, { Component } from 'react';
 import { Helmet } from 'react-helmet';
 import '../../assets/css/style.css';
+import client from './apollo';
+import Chats from './Chats';
+
+
 
 const posts = [{
     id: 2,
