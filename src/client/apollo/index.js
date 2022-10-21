@@ -1,5 +1,7 @@
-import { ApolloClient } from 'apollo-client';
-import { InMemoryCache } from 'apollo-cache-inmemory';
+import { ApolloClient } from '@apollo/client';
+import { InMemoryCache } from '@apollo/client';
+
+//import { InMemoryCache } from 'apollo-cache-inmemory';
 import { HttpLink } from 'apollo-link-http';
 import { onError } from 'apollo-link-error';
 import { ApolloLink } from 'apollo-link';
@@ -17,7 +19,7 @@ const client = new ApolloClient({
       }
     }),
     new HttpLink({
-      uri: 'http://ec2-35-162-152-22.us-west-2.compute.amazonaws.com:8000/graphql',
+	    uri: 'http://ec2-3-139-236-166.us-east-2.compute.amazonaws.com:8000/graphql',
     }),
  ]),
  cache: new InMemoryCache(),

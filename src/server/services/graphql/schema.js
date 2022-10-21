@@ -9,6 +9,9 @@ const typeDefinitions = `
     text: String
     user: User
   }
+  type PostFeed {
+    posts: [Post]
+  }
   type Message {
     id: Int
     text: String
@@ -51,7 +54,8 @@ const typeDefinitions = `
     posts: [Post]
     chats: [Chat]
     chat(chatId: Int): Chat
-  }
+    postsFeed(page: Int, limit: Int): PostFeed
+ }
   schema {
     query: RootQuery
     mutation: RootMutation
