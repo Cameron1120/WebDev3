@@ -1,6 +1,11 @@
 import logger from '../../helpers/logger';
 import Sequelize from 'sequelize';
+import bcrypt from 'bcrypt';
+import JWT from 'jsonwebtoken';
 const Op = Sequelize.Op;
+const {
+  JWT_SECRET
+} = process.env;
 
 export default function resolver() {
   const {
@@ -153,9 +158,94 @@ export default function resolver() {
           ],
         });
       },
+      currentUser(root, args, context) {
+        return context.user;
+      },
     },
     RootMutation: {
-      addChat(root, {
+     signup(root, {
+        email,
+        password,
+        username
+      }, context) {
+        return User.findAll({
+          where: {
+            [Op.or]: [{
+              email
+            }, {
+              username
+            }]
+          },
+          raw: true,
+        }).then(async (users) => {
+          if (users.length) {
+            throw new Error('User already exists');
+          } else {
+            return bcrypt.hash(password, 10).then((hash) => {
+              return User.create({
+                email,
+                password: hash,
+                username,
+                activated: 1,
+              }).then((newUser) => {
+                const token = JWT.sign({
+                  email,
+                  id: newUser.id
+                }, 
+
+
+
+"Asdadfafasdfasdfsadfsadfsadfasdfasdfasddddddddddddddddddddddddddddsadffffffffffvadfadfasdfasssssssss1231231231231231321231231231"
+
+, {
+                  expiresIn: '1d'
+                });
+                return {
+                  token
+                };
+              });
+            });
+          }
+        });
+      },
+      login(root, {
+        email,
+        password
+      }, context) {
+        return User.findAll({
+          where: {
+            email
+          },
+          raw: true
+        }).then(async (users) => {
+          if (users.length = 1) {
+            const user = users[0];
+            const passwordValid = await bcrypt.compare(password, user.password);
+            if (!passwordValid) {
+              throw new Error('Password does not match');
+            }
+            const token = JWT.sign({
+              email,
+              id: user.id
+            }, 
+
+
+"Asdadfafasdfasdfsadfsadfsadfasdfasdfasddddddddddddddddddddddddddddsadffffffffffvadfadfasdfasssssssss1231231231231231321231231231"
+
+
+, {
+              expiresIn: '1d'
+            });
+
+            return {
+              token
+            };
+          } else {
+            throw new Error("User not found");
+          }
+        });
+      },
+     addChat(root, {
         chat
       }, context) {
         return Chat.create().then((newChat) => {
@@ -234,7 +324,7 @@ export default function resolver() {
             success: false
           };
         }, function (err) {
-          logger.log({
+		logger.log({
             level: 'error',
             message: err.message,
           });
