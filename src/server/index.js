@@ -3,17 +3,15 @@ import path from 'path';
 import helmet from 'helmet';
 import cors from 'cors';
 import compress from 'compression';
-//import services from './services';
+const graphqlUploadExpress = require('graphql-upload/graphqlUploadExpress.js');
 import servicesLoader from './services';
-
 import db from './database';
 
 const utils = {
-    db,
+  db,
 };
+
 const services = servicesLoader(utils);
-
-
 
 const root = path.join(__dirname, '../../');
 
@@ -44,6 +42,7 @@ for (let i = 0; i < serviceNames.length; i += 1) {
   if (name === 'graphql') {
     (async () => {
       await services[name].start();
+      app.use(graphqlUploadExpress());
       services[name].applyMiddleware({ app });
     })();
   } else {

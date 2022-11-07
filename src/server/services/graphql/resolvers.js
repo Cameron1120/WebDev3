@@ -2,9 +2,27 @@ import logger from '../../helpers/logger';
 import Sequelize from 'sequelize';
 import bcrypt from 'bcrypt';
 import JWT from 'jsonwebtoken';
+
+//import {
+//  GraphQLUpload
+//} from 'graphql-upload';
+
+import aws from 'aws-sdk';
+require('dotenv').config();
+
+const GraphQLUpload = require('graphql-upload/GraphQLUpload.js')
+
+const s3 = new aws.S3({
+  signatureVersion: 'v4',
+  apiVersion: 'latest',	
+  region: 'us-east-2',
+  accessKeyId: process.env.AWS_ACCESS_KEY,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+
+});
 const Op = Sequelize.Op;
 const {
-  JWT_SECRET
+  JWT_SECRET_KEY
 } = process.env;
 
 export default function resolver() {
@@ -19,6 +37,7 @@ export default function resolver() {
   } = db.models;
 
   const resolvers = {
+    Upload: GraphQLUpload,
     Post: {
       user(post, args, context) {
         return post.getUser();
@@ -120,28 +139,20 @@ export default function resolver() {
         });
       },
       chats(root, args, context) {
-        return User.findAll().then((users) => {
-          if (!users.length) {
-            return [];
-          }
-
-          const usersRow = users[0];
-
-          return Chat.findAll({
-            include: [{
-                model: User,
-                required: true,
-                through: {
-                  where: {
-                    userId: usersRow.id
-                  }
-                },
+        return Chat.findAll({
+          include: [{
+              model: User,
+              required: true,
+              through: {
+                where: {
+                  userId: context.user.id
+                }
               },
-              {
-                model: Message,
-              }
-            ],
-          });
+            },
+            {
+              model: Message,
+            }
+          ],
         });
       },
       chat(root, {
@@ -163,7 +174,7 @@ export default function resolver() {
       },
     },
     RootMutation: {
-     signup(root, {
+      signup(root, {
         email,
         password,
         username
@@ -191,13 +202,7 @@ export default function resolver() {
                 const token = JWT.sign({
                   email,
                   id: newUser.id
-                }, 
-
-
-
-"Asdadfafasdfasdfsadfsadfsadfasdfasdfasddddddddddddddddddddddddddddsadffffffffffvadfadfasdfasssssssss1231231231231231321231231231"
-
-, {
+                }, JWT_SECRET, {
                   expiresIn: '1d'
                 });
                 return {
@@ -227,13 +232,9 @@ export default function resolver() {
             const token = JWT.sign({
               email,
               id: user.id
-            }, 
-
-
-"Asdadfafasdfasdfsadfsadfsadfasdfasdfasddddddddddddddddddddddddddddsadffffffffffvadfadfasdfasssssssss1231231231231231321231231231"
-
-
-, {
+           }, 
+		    "Asdadfafasdfasdfsadfsadfsadfasdfasdfasddddddddddddddddddddddddddddsadffffffffffvadfadfasdfasssssssss1231231231231231321231231231"
+		    , {
               expiresIn: '1d'
             });
 
@@ -245,7 +246,7 @@ export default function resolver() {
           }
         });
       },
-     addChat(root, {
+      addChat(root, {
         chat
       }, context) {
         return Chat.create().then((newChat) => {
@@ -280,6 +281,38 @@ export default function resolver() {
               return newMessage;
             });
           });
+        });
+      },
+      async uploadAvatar(root, {
+        file
+      }, context) {
+        const {
+          createReadStream,
+          filename,
+          mimetype,
+          encoding
+        } = await file;
+        const bucket = 'cis419-bucket';
+        const params = {
+          Bucket: bucket,
+          Key: context.user.id + '/' + filename,
+          ACL: 'public-read',
+          Body: createReadStream()
+        };
+
+        const response = await s3.upload(params).promise();
+
+        return User.update({
+          avatar: response.Location
+        }, {
+          where: {
+            id: context.user.id
+          }
+        }).then(() => {
+          return {
+            filename: filename,
+            url: response.Location
+          }
         });
       },
       addPost(root, {
@@ -324,7 +357,7 @@ export default function resolver() {
             success: false
           };
         }, function (err) {
-		logger.log({
+          logger.log({
             level: 'error',
             message: err.message,
           });
