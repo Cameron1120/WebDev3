@@ -8,7 +8,6 @@ posts {
 id
 text
 user
-
 {
 avatar
 username
@@ -76,5 +75,3 @@ return (
 
 
 export default Feed
-
-

@@ -8,10 +8,11 @@ module.exports = {
     mode: 'development',
     entry: './src/client/index.js',
     output: {
-        path: path.join(__dirname, outputDirectory),
-        filename: 'bundle.js'
+      path: path.join(__dirname, buildDirectory),
+      filename: 'bundle.js',
+      publicPath: '/',
     },
-   module: {
+    module: {
         rules: [
             {
                 test: /\.js$/,
@@ -32,10 +33,13 @@ module.exports = {
     ,
     devServer: {
 
-	    allowedHosts: [ 'ec2-18-223-206-90.us-east-2.compute.amazonaws.com'],
+            allowedHosts: [ 'ec2-18-117-76-43.us-east-2.compute.amazonaws.com'],
 
             port: 3000,
-        open: true
+        open: true,
+    
+      historyApiFallback: true,
+
     },
     plugins: [
         new CleanWebpackPlugin({

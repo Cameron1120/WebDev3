@@ -2,27 +2,29 @@ import logger from '../../helpers/logger';
 import Sequelize from 'sequelize';
 import bcrypt from 'bcrypt';
 import JWT from 'jsonwebtoken';
-
 //import {
 //  GraphQLUpload
 //} from 'graphql-upload';
-
 import aws from 'aws-sdk';
 require('dotenv').config();
 
-const GraphQLUpload = require('graphql-upload/GraphQLUpload.js')
+
+//const GraphQLUpload = require('graphql-upload/GraphQLUpload.js')
+const   GraphQLUpload = require('graphql-upload/GraphQLUpload.js')
 
 const s3 = new aws.S3({
   signatureVersion: 'v4',
-  apiVersion: 'latest',	
-  region: 'us-east-2',
+  apiVersion: 'latest',
+  region: 'us-west-2',
   accessKeyId: process.env.AWS_ACCESS_KEY,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY, 
+
+
 
 });
 const Op = Sequelize.Op;
 const {
-  JWT_SECRET_KEY
+  JWT_SECRET
 } = process.env;
 
 export default function resolver() {
@@ -102,13 +104,25 @@ export default function resolver() {
             [Op.like]: '%' + text + '%'
           }
         };
-        return {
+
+	    return {
           users: User.findAll(query)
         };
       },
-      postsFeed(root, {
+      
+     user(root, {
+        username
+      }, context) {
+        return User.findOne({
+          where: {
+            username
+          }
+        });
+      },
+
+    postsFeed(root, {
         page,
-        limit
+        limit, username
       }, context) {
         var skip = 0;
 
@@ -127,7 +141,18 @@ export default function resolver() {
           query.limit = limit;
         }
 
-        return {
+        if (username) {
+          query.include = [{
+            model: User
+          }];
+          query.where = {
+            '$User.username$': username
+          };
+        }
+
+
+
+      return {
           posts: Post.findAll(query)
         };
       },
@@ -202,7 +227,12 @@ export default function resolver() {
                 const token = JWT.sign({
                   email,
                   id: newUser.id
-                }, JWT_SECRET, {
+                }, 
+
+"Asdadfafasdfasdfsadfsadfsadfasdfasdfasddddddddddddddddddddddddddddsadffffffffffvadfadfasdfasssssssss1231231231231231321231231231"
+
+
+			, {
                   expiresIn: '1d'
                 });
                 return {
@@ -232,8 +262,11 @@ export default function resolver() {
             const token = JWT.sign({
               email,
               id: user.id
-           }, 
-		    "Asdadfafasdfasdfsadfsadfsadfasdfasdfasddddddddddddddddddddddddddddsadffffffffffvadfadfasdfasssssssss1231231231231231321231231231"
+            }, 
+
+
+"Asdadfafasdfasdfsadfsadfsadfasdfasdfasddddddddddddddddddddddddddddsadffffffffffvadfadfasdfasssssssss1231231231231231321231231231"
+
 		    , {
               expiresIn: '1d'
             });
@@ -292,7 +325,7 @@ export default function resolver() {
           mimetype,
           encoding
         } = await file;
-        const bucket = 'cis419-bucket';
+        const bucket = 'als-new-bucket';
         const params = {
           Bucket: bucket,
           Key: context.user.id + '/' + filename,

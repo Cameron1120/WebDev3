@@ -11,6 +11,7 @@ import { withApollo } from '@apollo/client/react/hoc';
 import './components/fontawesome';
 import '../../assets/css/style.css';
 import 'cropperjs/dist/cropper.css';
+import Router from './router';
 
 const App = ({ client }) => {
     const [loggedIn, setLoggedIn] = useState(!!localStorage.getItem('jwt'));
@@ -24,20 +25,6 @@ const App = ({ client }) => {
         });
     }
 
-    useEffect(() => {
-        const unsubscribe = client.onClearStore(
-          () => {
-            if(loggedIn){
-              setLoggedIn(false)
-            }
-          }
-        );
-        return () => {
-          unsubscribe();
-        }
-    }, []);
-
-
     if(loading) {
         return <Loading />;
     }
@@ -48,16 +35,13 @@ const App = ({ client }) => {
                 <title>Graphbook - Feed</title>
                 <meta name="description" content="Newsfeed of all your friends on Graphbook" />
             </Helmet>
-            {loggedIn && (
-                <div>
-                    <Bar changeLoginState={handleLogin} />
-                    <Feed />
-                </div>
-            )}
-            {!loggedIn && <LoginRegisterForm changeLoginState={handleLogin} />}
-            {!loggedIn && error && <Error><p>{error.message}</p></Error>}
-        </div>
+
+		<Router loggedIn={loggedIn} changeLoginState={handleLogin}/>        
+
+
+
+   </div>
     )
 }
 
-export default withApollo(App);
+export default App;

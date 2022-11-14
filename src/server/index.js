@@ -3,7 +3,8 @@ import path from 'path';
 import helmet from 'helmet';
 import cors from 'cors';
 import compress from 'compression';
-const graphqlUploadExpress = require('graphql-upload/graphqlUploadExpress.js');
+//import { graphqlUploadExpress } from 'graphql-upload';
+const graphqlUploadExpress  = require('graphql-upload/graphqlUploadExpress.js');
 import servicesLoader from './services';
 import db from './database';
 

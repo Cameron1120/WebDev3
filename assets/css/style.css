@@ -96,7 +96,7 @@ form [type=submit] {
     right: 0;
     border-left: 1px solid #c3c3c3;
 }
-
+  
 .chats .chat {
     cursor: pointer;
 }
@@ -106,13 +106,13 @@ form [type=submit] {
     font-size: 16px;
     margin-left: 5px;
 }
-
+  
 .chats .chat .header h2, .chats .chat .header span {
     color: #333;
     font-size: 16px;
     margin: 0;
 }
-
+  
 .chats .chat .header span {
     color: #333;
     font-size: 12px;
@@ -127,14 +127,14 @@ form [type=submit] {
     border-left: 1px solid #c3c3c3;
     border-right: 1px solid #c3c3c3;
 }
-
+  
 .chatWindow .header {
     width: calc(100% - 10px);
     background-color: #c3c3c3;
     padding: 5px;
     height: 20px;
 }
-
+  
 .chatWindow .header .close {
     float: right;
     border: none;
@@ -142,16 +142,16 @@ form [type=submit] {
     color: #fff;
     cursor: pointer;
 }
-
+  
 .chatWindow .header .close:focus {
     outline: none;
 }
-
+  
 .chatWindow .messages {
     overflow-y: scroll;
     height: calc(100% - 50px);
 }
-
+  
 .chatWindow .messages .message {
     width: 80%;
     border: 1px solid #4079f3;
@@ -159,26 +159,26 @@ form [type=submit] {
     border-radius: 5px;
     padding: 2px;
 }
-
+  
 .chatWindow .messages .message.left {
     background-color: #78a3ff;
     color: #fff;
     float: left;
 }
-
+  
 .chatWindow .messages .message.right {
     float: right;
     background-color: #E8F4FB;
     color: #000;
 }
-
+  
 .openChats {
     position: fixed;
     right: 200px;
     width: calc(100% - 200px);
     bottom: 0;
 }
-
+  
 .wrapper {
     height: 100%;
     position: fixed;
@@ -199,11 +199,11 @@ form [type=submit] {
 
 .bouncer {
     margin: 20px auto;
-    border-radius: 100%;
+    border-radius: 100%; 
     -webkit-animation: bounce 1.0s infinite ease-in-out;
     animation: bounce 1.0s infinite ease-in-out;
 }
-
+  
 @-webkit-keyframes bounce {
     0% {
         -webkit-transform: scale(0)
@@ -213,9 +213,9 @@ form [type=submit] {
         opacity: 0;
     }
 }
-
+  
 @keyframes bounce {
-    0% {
+    0% { 
         -webkit-transform: scale(0);
         transform: scale(0);
     }
@@ -231,7 +231,7 @@ form [type=submit] {
     padding: 5px;
     max-width: 400px;
 }
-
+  
 .error.message {
     border-radius: 5px;
     background-color: #FFF7F5;
@@ -379,4 +379,85 @@ form [type=submit] {
     height: 50px;
     width: 100%;
     background-color: #fff;
+}
+
+.authModal {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+}
+
+.authModal > div {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.authModal > div form {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    min-width: 200px; 
+    border: 1px solid #333;
+    background-color: #fff;
+    padding: 20px;
+}
+
+.authModal > div form input {
+    border: 1px solid #c3c3c3;
+    padding: 5px;
+}
+
+.authModal > div form input[type=submit] {
+    width: 100px;
+    float: right;
+    margin-top: 10px;
+}
+
+button.cancelUpload {
+    border: none;
+    background-color: #6ca6fd;
+    color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    float: left;
+    margin-top: 10px;
+}
+
+button.uploadAvatar {
+    border: none;
+    background-color: #6ca6fd;
+    color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    float: right;
+    margin-top: 10px;
+}
+
+.post .header a > * {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.profileHeader {
+    margin-top: 60px;
+}
+
+.profileHeader .information {
+    width: calc(100% - 270px);
+    vertical-align: middle;
+    display: inline-block;
+    padding-left: 20px;
+}
+
+.profileHeader .avatar {
+    display: inline-block;
+    width: 250px;
+    vertical-align: middle;
 }
