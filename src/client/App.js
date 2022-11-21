@@ -1,20 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
-import Feed from './Feed';
-//import Chats from './Chats';
-import Bar from './components/bar';
-import LoginRegisterForm from './components/loginregister';
-import Error from './components/error';
 import { useCurrentUserQuery } from './apollo/queries/currentUserQuery';
 import Loading from './components/loading';
 import { withApollo } from '@apollo/client/react/hoc';
+import Router from './router';
 import './components/fontawesome';
 import '../../assets/css/style.css';
 import 'cropperjs/dist/cropper.css';
-import Router from './router';
 
 const App = ({ client }) => {
-    const [loggedIn, setLoggedIn] = useState(!!localStorage.getItem('jwt'));
+    const [loggedIn, setLoggedIn] = useState((typeof window.__APOLLO_STATE__ !== typeof undefined && typeof window.__APOLLO_STATE__.ROOT_QUERY !== typeof undefined && typeof window.__APOLLO_STATE__.ROOT_QUERY.currentUser !== typeof undefined));
     const { data, error, loading, refetch } = useCurrentUserQuery();
 
     const handleLogin = (status) => {
@@ -25,23 +20,28 @@ const App = ({ client }) => {
         });
     }
 
-    if(loading) {
-        return <Loading />;
-    }
+    useEffect(() => {
+        const unsubscribe = client.onClearStore(
+          () => {
+            if(loggedIn){
+              setLoggedIn(false)
+            }
+          }
+        );
+        return () => {
+          unsubscribe();
+        }
+    }, []);
 
     return (
         <div className="container">
-            <Helmet>
-                <title>Graphbook - Feed</title>
-                <meta name="description" content="Newsfeed of all your friends on Graphbook" />
-            </Helmet>
-
-		<Router loggedIn={loggedIn} changeLoginState={handleLogin}/>        
-
-
-
-   </div>
+          <Helmet>
+            <title>Graphbook - Feed</title>
+            <meta name="description" content="Newsfeed of all your friends on Graphbook" />
+          </Helmet>
+          <Router loggedIn={loggedIn} changeLoginState={handleLogin}/>
+        </div>
     )
 }
 
-export default App;
+export default withApollo(App);

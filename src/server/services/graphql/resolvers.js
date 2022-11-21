@@ -38,7 +38,8 @@ export default function resolver() {
     Message
   } = db.models;
 
-  const resolvers = {
+
+const resolvers = {
     Upload: GraphQLUpload,
     Post: {
       user(post, args, context) {
@@ -104,13 +105,11 @@ export default function resolver() {
             [Op.like]: '%' + text + '%'
           }
         };
-
-	    return {
+        return {
           users: User.findAll(query)
         };
       },
-      
-     user(root, {
+      user(root, {
         username
       }, context) {
         return User.findOne({
@@ -119,10 +118,10 @@ export default function resolver() {
           }
         });
       },
-
-    postsFeed(root, {
+      postsFeed(root, {
         page,
-        limit, username
+        limit,
+        username
       }, context) {
         var skip = 0;
 
@@ -150,9 +149,7 @@ export default function resolver() {
           };
         }
 
-
-
-      return {
+        return {
           posts: Post.findAll(query)
         };
       },
@@ -199,6 +196,15 @@ export default function resolver() {
       },
     },
     RootMutation: {
+      logout(root, params, context) {
+        context.cookies.set(
+          'authorization',
+          '', { signed: true, expires: new Date(), httpOnly: true, secure: false, sameSite: 'strict' }
+        );
+        return {
+          message: true
+        };
+      },
       signup(root, {
         email,
         password,
@@ -227,14 +233,19 @@ export default function resolver() {
                 const token = JWT.sign({
                   email,
                   id: newUser.id
-                }, 
-
-"Asdadfafasdfasdfsadfsadfsadfasdfasdfasddddddddddddddddddddddddddddsadffffffffffvadfadfasdfasssssssss1231231231231231321231231231"
-
-
-			, {
+                }, "Asdadfafasdfasdfsadfsadfsadfasdfasdfasddddddddddddddddddddddddddddsadffffffffffvadfadfasdfasssssssss1231231231231231321231231231", {
                   expiresIn: '1d'
                 });
+                const cookieExpiration = 1;
+                const expirationDate = new Date();
+                expirationDate.setDate(
+                  expirationDate.getDate() + cookieExpiration
+                );
+
+                context.cookies.set(
+                  'authorization',
+                  token, { signed: true, expires: expirationDate, httpOnly: true, secure: false, sameSite: 'strict' }
+                );
                 return {
                   token
                 };
@@ -262,14 +273,20 @@ export default function resolver() {
             const token = JWT.sign({
               email,
               id: user.id
-            }, 
-
-
-"Asdadfafasdfasdfsadfsadfsadfasdfasdfasddddddddddddddddddddddddddddsadffffffffffvadfadfasdfasssssssss1231231231231231321231231231"
-
-		    , {
+            }, "Asdadfafasdfasdfsadfsadfsadfasdfasdfasddddddddddddddddddddddddddddsadffffffffffvadfadfasdfasssssssss1231231231231231321231231231", {
               expiresIn: '1d'
             });
+
+            const cookieExpiration = 1;
+            const expirationDate = new Date();
+            expirationDate.setDate(
+              expirationDate.getDate() + cookieExpiration
+            );
+
+            context.cookies.set(
+              'authorization',
+              token, { signed: true, expires: expirationDate, httpOnly: true, secure: false, sameSite: 'strict' }
+            );
 
             return {
               token
@@ -325,7 +342,7 @@ export default function resolver() {
           mimetype,
           encoding
         } = await file;
-        const bucket = 'als-new-bucket';
+        const bucket = 'apollo-book';
         const params = {
           Bucket: bucket,
           Key: context.user.id + '/' + filename,
