@@ -31,7 +31,7 @@ export default (req, loggedIn) => {
       }),
       AuthLink,
       new HttpLink({
-	      uri: 'http://ec2-3-16-66-179.us-east-2.compute.amazonaws.com/graphql',
+	      uri: 'http://ec2-18-118-254-233.us-east-2.compute.amazonaws.com/graphql',
         credentials: 'same-origin',
         fetch
       })

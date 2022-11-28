@@ -95,3 +95,4 @@ const AvatarModal = ({ isOpen, showModal }) => {
 }
 
 export default AvatarModal
+

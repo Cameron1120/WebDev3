@@ -1,62 +1,59 @@
 import React, { useState } from 'react';
-import { gql, useQuery, useMutation, InMemoryCache } from '@apollo/client';
+import InfiniteScroll from 'react-infinite-scroll-component';
+import Loading from './components/loading';
+import Error from './components/error';
 import Post from './components/post';
-
-const GET_POSTS=gql`
-query {
-posts {
-id
-text
-user
-{
-avatar
-username
-}
-}
-}
-`;
-
-
-const ADD_POST = gql`
-mutation addPost($post: PostInput!){
-addPost(post: $post){
-id
-text
-user {
-username 
-avatar
-}
-}
-}`;
-
-
-
+import FeedList from './components/post/feedlist';
+import { useGetPostsQuery } from './apollo/queries/getPosts';
+import { useAddPostMutation } from './apollo/mutations/addPost';
 
 const Feed = () => {
     const [postContent, setPostContent] = useState('');
-    const { loading, error, data, fetchMore } = useQuery(GET_POSTS);
-   // const [addPost] = useMutation(ADD_POST);
-    const [addPost] = useMutation(ADD_POST, { refetchQueries: [{ query: GET_POSTS }]});
+    const [page, setPage] = useState(0);
+    const { loading, error, data, fetchMore } = useGetPostsQuery();
+    const [addPost] = useAddPostMutation(postContent);
 
-//const [addPost] = useMutation(ADD_POST, {
-//	update(cache, { data: {addPost }})   {
-//	const data = cache.readQuery({ query: GET_POSTS });
-//	const newData = { posts: [addPost, ...data.posts]};
-//	cache.writeQuery({ query: GET_POSTS, data: newData });
-//}
-//});
+    const loadMore = () => {
+        fetchMore({
+            variables: {
+                page: page + 1,
+            },
+            updateQuery(previousResult, { fetchMoreResult }) {
+                if(!fetchMoreResult.postsFeed.posts.length) {
+                    setHasMore(false);
+                    return previousResult;
+                }
+
+                setPage(page + 1);
+
+                const newData = {
+                    postsFeed: {
+                        __typename: 'PostFeed',
+                        posts: [
+                            ...previousResult.postsFeed.posts,
+                            ...fetchMoreResult.postsFeed.posts
+                        ]
+                    }
+                };
+                return newData;
+            }
+        });
+    }
+
 
     const handleSubmit = (event) => {
-    event.preventDefault();
-    addPost({ variables: { post: { text: postContent }}});
-    setPostContent(''); 
-};
-if (loading) return 'Loading...';
-if (error) return `Error! ${error.message}`;
+        event.preventDefault();
+        addPost({ variables: { post: { text: postContent } } });
+        setPostContent('');
+    };
 
-const { posts } = data;
+    if (loading) return <Loading />;
+    if (error) return <Error><p>{error.message}</p></Error>;
 
-return (
+    const { postsFeed } = data;
+    const { posts } = postsFeed;
+
+    return (
         <div className="container">
             <div className="postForm">
                 <form onSubmit={handleSubmit}>
@@ -64,14 +61,11 @@ return (
                     <input type="submit" value="Submit" />
                 </form>
             </div>
-            <div className="feed">
-                {posts.map((post, i) =>
-                   <Post key={post.id} post={post}/>
-	        )} 
-            </div>  
-
-
-	</div>)}
-
+            <FeedList posts={posts} fetchMore={loadMore}/>
+        </div>
+    )
+}
 
 export default Feed
+
+

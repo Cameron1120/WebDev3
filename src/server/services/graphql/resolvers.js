@@ -5,41 +5,39 @@ import JWT from 'jsonwebtoken';
 //import {
 //  GraphQLUpload
 //} from 'graphql-upload';
+
+
+const GraphQLUpload = require('graphql-upload/GraphQLUpload.js')
+
+
 import aws from 'aws-sdk';
-require('dotenv').config();
-
-
-//const GraphQLUpload = require('graphql-upload/GraphQLUpload.js')
-const   GraphQLUpload = require('graphql-upload/GraphQLUpload.js')
+import { PubSub, withFilter } from 'graphql-subscriptions';
+const pubsub = new PubSub();
 
 const s3 = new aws.S3({
   signatureVersion: 'v4',
-  apiVersion: 'latest',
-  region: 'us-west-2',
-  accessKeyId: process.env.AWS_ACCESS_KEY,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY, 
-
-
-
+//  region: 'eu-central-1',
+  region: 'us-west-2'
 });
 const Op = Sequelize.Op;
 const {
   JWT_SECRET
 } = process.env;
 
+const cookieExpiration = 1;
+
 export default function resolver() {
-  const {
-    db
-  } = this;
-  const {
-    Post,
-    User,
+    const {
+        db
+    } = this;
+    const {
+        Post,
+        User,
     Chat,
     Message
   } = db.models;
 
-
-const resolvers = {
+  const resolvers = {
     Upload: GraphQLUpload,
     Post: {
       user(post, args, context) {
@@ -195,7 +193,54 @@ const resolvers = {
         return context.user;
       },
     },
+    RootSubscription: {
+      messageAdded: {
+        subscribe: withFilter(() => pubsub.asyncIterator('messageAdded'),
+            (payload, variables, context) => {
+                if (payload.messageAdded.UserId !== context.user.id) {
+                    return Chat.findOne({
+                        where: {
+                            id: payload.messageAdded.ChatId
+                        },
+                        include: [{
+                            model: User,
+                            required: true,
+                            through: {
+                                where: {
+                                    userId: context.user.id
+                                }
+                            },
+                        }],
+                    }).then((chat) => {
+                        if (chat !== null) {
+                            return true;
+                        }
+                        return false;
+                    })
+                }
+                return false;
+            }),
+    }
+    },
     RootMutation: {
+      addMessage(root, { message }, context) {
+        logger.log({
+            level: 'info',
+            message: 'Message was created',
+        });
+        return Message.create({
+            ...message,
+        }).then((newMessage) => {
+          return Promise.all([
+              newMessage.setUser(context.user.id),
+              newMessage.setChat(message.chatId),
+          ]).then(() => {
+              pubsub.publish('messageAdded', { messageAdded:
+              newMessage });
+              return newMessage;
+          });
+        });
+      },
       logout(root, params, context) {
         context.cookies.set(
           'authorization',
@@ -233,10 +278,13 @@ const resolvers = {
                 const token = JWT.sign({
                   email,
                   id: newUser.id
-                }, "Asdadfafasdfasdfsadfsadfsadfasdfasdfasddddddddddddddddddddddddddddsadffffffffffvadfadfasdfasssssssss1231231231231231321231231231", {
+                },
+
+"Asdadfafasdfasdfsadfsadfsadfasdfasdfasddddddddddddddddddddddddddddsadffffffffffvadfadfasdfasssssssss1231231231231231321231231231"
+
+			, {
                   expiresIn: '1d'
                 });
-                const cookieExpiration = 1;
                 const expirationDate = new Date();
                 expirationDate.setDate(
                   expirationDate.getDate() + cookieExpiration
@@ -273,11 +321,13 @@ const resolvers = {
             const token = JWT.sign({
               email,
               id: user.id
-            }, "Asdadfafasdfasdfsadfsadfsadfasdfasdfasddddddddddddddddddddddddddddsadffffffffffvadfadfasdfasssssssss1231231231231231321231231231", {
+            },
+
+"Asdadfafasdfasdfsadfsadfsadfasdfasdfasddddddddddddddddddddddddddddsadffffffffffvadfadfasdfasssssssss1231231231231231321231231231"
+
+		    , {
               expiresIn: '1d'
             });
-
-            const cookieExpiration = 1;
             const expirationDate = new Date();
             expirationDate.setDate(
               expirationDate.getDate() + cookieExpiration
@@ -308,28 +358,6 @@ const resolvers = {
               message: 'Message was created',
             });
             return newChat;
-          });
-        });
-      },
-      addMessage(root, {
-        message
-      }, context) {
-        return User.findAll().then((users) => {
-          const usersRow = users[0];
-
-          return Message.create({
-            ...message,
-          }).then((newMessage) => {
-            return Promise.all([
-              newMessage.setUser(usersRow.id),
-              newMessage.setChat(message.chatId),
-            ]).then(() => {
-              logger.log({
-                level: 'info',
-                message: 'Message was created',
-              });
-              return newMessage;
-            });
           });
         });
       },

@@ -1,11 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './App';
 import { ApolloProvider } from '@apollo/client/react';
+import App from './App';
 import client from './apollo';
 
-ReactDOM.render(
-    <ApolloProvider client={client}>
-        <App/>
-    </ApolloProvider>
-, document.getElementById('root'));
+ReactDOM.hydrate(
+  <ApolloProvider client={client}>
+    <App/>
+  </ApolloProvider>, document.getElementById('root')
+);

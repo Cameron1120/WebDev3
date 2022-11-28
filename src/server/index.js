@@ -47,7 +47,7 @@ app.use(
     next();
   }
 );
-if(process.env.NODE_ENV === 'development') {
+//if(process.env.NODE_ENV === 'development') {
   const devMiddleware = require('webpack-dev-middleware');
   const hotMiddleware = require('webpack-hot-middleware');
   const webpack = require('webpack');
@@ -55,7 +55,7 @@ if(process.env.NODE_ENV === 'development') {
   const compiler = webpack(config);
   app.use(devMiddleware(compiler));
   app.use(hotMiddleware(compiler));
-}
+//}
 app.use(cors());
 app.use('/', express.static(path.join(root, 'dist/client')));
 app.use('/uploads', express.static(path.join(root, 'uploads')));
@@ -68,6 +68,8 @@ app.get('*', async (req, res) => {
   } catch(e) {
     loggedIn = false;
   }
+ 
+//loggedIn = true
   const client = ApolloClient(req, loggedIn);
   const context= {};
   const App = (<Graphbook client={client} loggedIn={loggedIn} location={req.url} context={context}/>);
